@@ -1,15 +1,20 @@
 from relationship_app.models import Author, Book, Library, Librarian
 
 
-def get_books_by_author(author_id):
+def get_books_by_author(author_name):
     """
     Query all books written by a specific author.
     Args:
-        author_id (int): ID of the author
+        author_name (str): Name of the author
     Returns:
         QuerySet: Books written by the specified author
     """
-    return Book.objects.filter(author_id=author_id)
+    try:
+        author = Author.objects.get(name=author_name)
+        books = Book.objects.filter(author=author)
+        return books
+    except Author.DoesNotExist:
+        return None
 
 
 def list_library_books(library_name):
@@ -42,15 +47,18 @@ def get_library_librarian(library_id):
         return None
 
 
-# Optional examples for testing
+# Example usage (optional for manual testing)
 if __name__ == "__main__":
-    # Query all books by author with ID 1
-    books = get_books_by_author(1)
-    print("Books by Author (ID=1):")
-    for book in books:
-        print(f"- {book.title}")
+    # Query all books by author name
+    books = get_books_by_author("J.K. Rowling")
+    if books:
+        print("Books by J.K. Rowling:")
+        for book in books:
+            print(f"- {book.title}")
+    else:
+        print("Author not found.")
 
-    # List all books in a library named "Central Library"
+    # List all books in a library
     library_books = list_library_books("Central Library")
     if library_books:
         print("\nBooks in Central Library:")
@@ -59,7 +67,7 @@ if __name__ == "__main__":
     else:
         print("\nLibrary not found.")
 
-    # Retrieve the librarian for library with ID 1
+    # Retrieve the librarian for a library
     librarian = get_library_librarian(1)
     if librarian:
         print(f"\nLibrarian for Library ID 1: {librarian.name}")
