@@ -1,69 +1,67 @@
-from django.db import models
 from relationship_app.models import Author, Book, Library, Librarian
+
 
 def get_books_by_author(author_id):
     """
-    Query all books written by a specific author
+    Query all books written by a specific author.
     Args:
-        author_id: ID of the author
+        author_id (int): ID of the author
     Returns:
-        QuerySet of books by the specified author
+        QuerySet: Books written by the specified author
     """
-    try:
-        # Get all books by the author using the related name
-        books = Book.objects.filter(author_id=author_id)
-        return books
-    except Author.DoesNotExist:
-        return None
+    return Book.objects.filter(author_id=author_id)
 
-def list_library_books(library_id):
+
+def list_library_books(library_name):
     """
-    List all books in a specific library
+    List all books in a specific library.
     Args:
-        library_id: ID of the library
+        library_name (str): Name of the library
     Returns:
-        QuerySet of all books in the specified library
+        QuerySet: Books in the specified library
     """
     try:
-        # Get all books in the library
-        library = Library.objects.get(id=library_id)
-        books = library.books.all()  # Assuming there's a related_name='books' in the Book model
-        return books
+        library = Library.objects.get(name=library_name)
+        return library.books.all()
     except Library.DoesNotExist:
         return None
+
 
 def get_library_librarian(library_id):
     """
-    Retrieve the librarian for a specific library
+    Retrieve the librarian for a specific library.
     Args:
-        library_id: ID of the library
+        library_id (int): ID of the library
     Returns:
-        Librarian object associated with the library
+        Librarian: The librarian associated with the library
     """
     try:
-        # Get the librarian of the library (assuming one-to-one relationship)
         library = Library.objects.get(id=library_id)
-        return library.librarian  # Assuming there's a OneToOne relationship with Librarian
-    except Library.DoesNotExist:
+        return library.librarian
+    except (Library.DoesNotExist, Librarian.DoesNotExist):
         return None
 
-# Example usage:
-if __name__ == "__main__":
-    # Example: Get all books by author with ID 1
-    author_books = get_books_by_author(1)
-    if author_books:
-        print("Books by author:")
-        for book in author_books:
-            print(f"- {book.title}")
 
-    # Example: List all books in library with ID 1
-    library_books = list_library_books(1)
+# Optional examples for testing
+if __name__ == "__main__":
+    # Query all books by author with ID 1
+    books = get_books_by_author(1)
+    print("Books by Author (ID=1):")
+    for book in books:
+        print(f"- {book.title}")
+
+    # List all books in a library named "Central Library"
+    library_books = list_library_books("Central Library")
     if library_books:
-        print("\nBooks in library:")
+        print("\nBooks in Central Library:")
         for book in library_books:
             print(f"- {book.title}")
+    else:
+        print("\nLibrary not found.")
 
-    # Example: Get librarian for library with ID 1
+    # Retrieve the librarian for library with ID 1
     librarian = get_library_librarian(1)
     if librarian:
-        print(f"\nLibrarian: {librarian.name}")
+        print(f"\nLibrarian for Library ID 1: {librarian.name}")
+    else:
+        print("\nNo librarian found for this library.")
