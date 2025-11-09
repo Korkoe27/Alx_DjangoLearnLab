@@ -4,7 +4,8 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
-from .models import Book, Library
+from .models import Book
+from .models import Library
 
 # ---------------------------
 # Function-Based View: List all books
