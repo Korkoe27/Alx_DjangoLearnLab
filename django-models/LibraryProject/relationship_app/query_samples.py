@@ -32,17 +32,18 @@ def list_library_books(library_name):
         return None
 
 
-def get_library_librarian(library_id):
+def get_library_librarian(library_name):
     """
     Retrieve the librarian for a specific library.
     Args:
-        library_id (int): ID of the library
+        library_name (str): Name of the library
     Returns:
         Librarian: The librarian associated with the library
     """
     try:
-        library = Library.objects.get(id=library_id)
-        return library.librarian
+        library = Library.objects.get(name=library_name)
+        librarian = Librarian.objects.get(library=library)
+        return librarian
     except (Library.DoesNotExist, Librarian.DoesNotExist):
         return None
 
@@ -68,8 +69,8 @@ if __name__ == "__main__":
         print("\nLibrary not found.")
 
     # Retrieve the librarian for a library
-    librarian = get_library_librarian(1)
+    librarian = get_library_librarian("Central Library")
     if librarian:
-        print(f"\nLibrarian for Library ID 1: {librarian.name}")
+        print(f"\nLibrarian for Central Library: {librarian.name}")
     else:
         print("\nNo librarian found for this library.")
