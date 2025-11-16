@@ -1,15 +1,44 @@
-from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import permission_required
+from .models import Book
+from .forms import ExampleForm
 
-class CustomUserAdmin(UserAdmin):
-    model = CustomUser
-    fieldsets = UserAdmin.fieldsets + (
-        ('Additional Info', {'fields': ('date_of_birth', 'profile_photo')}),
-    )
-    add_fieldsets = UserAdmin.add_fieldsets + (
-        ('Additional Info', {'fields': ('date_of_birth', 'profile_photo')}),
-    )
-    list_display = ['username', 'email', 'is_staff', 'date_of_birth']
+# View all books - requires view permission
+@permission_required('bookshelf.can_view', raise_exception=True)
+def book_list(request):
+    books = Book.objects.all()
+    return render(request, 'bookshelf/book_list.html', {'books': books})
 
-admin.site.register(CustomUser, CustomUserAdmin)
+# Create a book - requires create permission
+@permission_required('bookshelf.can_create', raise_exception=True)
+def book_create(request):
+    if request.method == 'POST':
+        form = ExampleForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('book_list')
+    else:
+        form = ExampleForm()
+    return render(request, 'bookshelf/book_form.html', {'form': form})
+
+# Edit a book - requires edit permission
+@permission_required('bookshelf.can_edit', raise_exception=True)
+def book_edit(request, pk):
+    book = get_object_or_404(Book, pk=pk)
+    if request.method == 'POST':
+        form = ExampleForm(request.POST, instance=book)
+        if form.is_valid():
+            form.save()
+            return redirect('book_list')
+    else:
+        form = ExampleForm(instance=book)
+    return render(request, 'bookshelf/book_form.html', {'form': form})
+
+# Delete a book - requires delete permission
+@permission_required('bookshelf.can_delete', raise_exception=True)
+def book_delete(request, pk):
+    book = get_object_or_404(Book, pk=pk)
+    if request.method == 'POST':
+        book.delete()
+        return redirect('book_list')
+    return render(request, 'bookshelf/book_confirm_delete.html', {'book': book})
